@@ -509,25 +509,51 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
    * @param f the new interrupt handler
    */
   @tailrec
-  final def setInterruptHandler(f: PartialFunction[Throwable, Unit]): Unit = state match {
-    case waitq: WaitQueue[A] =>
-      if (!cas(waitq, new Interruptible(waitq, f, Local.save())))
-        setInterruptHandler(f)
+  final def setInterruptHandler(f: PartialFunction[Throwable, Unit]): Unit = {
+    val funcName = "setInterruptHandler"
+    CoverageChecker.initialize(funcName, 9)
+    state match {
+      case waitq: WaitQueue[A] => {
+        CoverageChecker.reached(funcName, 0)
+        if (!cas(waitq, new Interruptible(waitq, f, Local.save()))) {
+          CoverageChecker.reached(funcName, 1)
+          setInterruptHandler(f)
+        }
+      }
 
-    case s: Interruptible[A] =>
-      if (!cas(s, new Interruptible(s.waitq, f, Local.save())))
-        setInterruptHandler(f)
+      case s: Interruptible[A] => {
+        CoverageChecker.reached(funcName, 2)
+        if (!cas(s, new Interruptible(s.waitq, f, Local.save()))) {
+          CoverageChecker.reached(funcName, 3)
+          setInterruptHandler(f)
+        }
+      }
 
-    case s: Transforming[A] =>
-      if (!cas(s, new Interruptible(s.waitq, f, Local.save())))
-        setInterruptHandler(f)
 
-    case s: Interrupted[A] =>
-      f.applyOrElse(s.signal, Promise.AlwaysUnit)
+      case s: Transforming[A] => {
+        CoverageChecker.reached(funcName, 4)
+        if (!cas(s, new Interruptible(s.waitq, f, Local.save()))) {
+          CoverageChecker.reached(funcName, 5)
+          setInterruptHandler(f)
+        }
+      }
 
-    case _: Try[A] /* Done */ => // ignore
 
-    case p: Promise[A] /* Linked */ => p.setInterruptHandler(f)
+      case s: Interrupted[A] => {
+        CoverageChecker.reached(funcName, 6)
+        f.applyOrElse(s.signal, Promise.AlwaysUnit)
+      }
+        
+      case _: Try[A] /* Done */ => {
+        // ignore
+        CoverageChecker.reached(funcName, 7)
+      }
+
+      case p: Promise[A] /* Linked */ => {
+        CoverageChecker.reached(funcName, 8)
+        p.setInterruptHandler(f)
+      }
+    }
   }
 
   // Useful for debugging waitq.
