@@ -19,6 +19,8 @@ package com.twitter.util
 import com.twitter.conversions.DurationOps._
 import java.util.concurrent.TimeUnit
 
+import com.twitter.util.CoverageChecker
+
 class DurationTest extends { val ops: Duration.type = Duration } with TimeLikeSpec[Duration] {
 
   "Duration" should {
@@ -289,6 +291,12 @@ class DurationTest extends { val ops: Duration.type = Duration } with TimeLikeSp
 
     "--Top == Top" in {
       assert(-(-Duration.Top) == Duration.Top)
+    }
+  }
+
+  "CoverageChecker" should {
+    "print map" in {
+      println(CoverageChecker.map.getOrElse("parse", sys.error(s"unexpected key")).mkString("[",", ", "]"))
     }
   }
 }
