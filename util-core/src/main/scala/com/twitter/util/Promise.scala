@@ -842,33 +842,37 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
 
   @tailrec
   protected final def continue(k: K[A]): Unit = {
-    CoverageChecker.initialize("detach", 6)
+    CoverageChecker.initialize("continue", 10)
     state match {
       case waitq: WaitQueue[A] =>
+        CoverageChecker.reached("continue", 0)
         if (!cas(waitq, WaitQueue(k, waitq))) {
-          CoverageChecker.reached("continue", 0)
-          continue(k)
-        }
-      case s: Interruptible[A] =>
-        if (!cas(s, new Interruptible(WaitQueue(k, s.waitq), s.handler, s.saved))) {
           CoverageChecker.reached("continue", 1)
           continue(k)
         }
-      case s: Transforming[A] =>
-        if (!cas(s, new Transforming(WaitQueue(k, s.waitq), s.other))) {
-          CoverageChecker.reached("continue", 2)
-          continue(k)
-        }
-      case s: Interrupted[A] =>
-        if (!cas(s, new Interrupted(WaitQueue(k, s.waitq), s.signal))) {
+      case s: Interruptible[A] =>
+        CoverageChecker.reached("continue", 2)
+        if (!cas(s, new Interruptible(WaitQueue(k, s.waitq), s.handler, s.saved))) {
           CoverageChecker.reached("continue", 3)
           continue(k)
         }
-      case v: Try[A] /* Done */ => 
+      case s: Transforming[A] =>
         CoverageChecker.reached("continue", 4)
+        if (!cas(s, new Transforming(WaitQueue(k, s.waitq), s.other))) {
+          CoverageChecker.reached("continue", 5)
+          continue(k)
+        }
+      case s: Interrupted[A] =>
+        CoverageChecker.reached("continue", 6)
+        if (!cas(s, new Interrupted(WaitQueue(k, s.waitq), s.signal))) {
+          CoverageChecker.reached("continue", 7)
+          continue(k)
+        }
+      case v: Try[A] /* Done */ => 
+        CoverageChecker.reached("continue", 8)
         k.runInScheduler(v)
       case p: Promise[A] /* Linked */ => 
-        CoverageChecker.reached("continue", 5)
+        CoverageChecker.reached("continue", 9)
         p.continue(k)
     }
 
