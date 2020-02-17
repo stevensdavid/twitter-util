@@ -2,6 +2,7 @@ package com.twitter.util
 
 import com.twitter.conversions.DurationOps._
 import org.scalatest.FunSuite
+import com.twitter.util.CoverageChecker
 
 class PromiseTest extends FunSuite {
 
@@ -339,5 +340,9 @@ class PromiseTest extends FunSuite {
 
     assert("main thread" == Await.result(p2, 3.seconds))
     assert("main thread" == Await.result(p, 3.seconds))
+  }
+
+  test("CoverageChecker") {
+    println("[Coverage] - " + CoverageChecker.map.getOrElse("detach", sys.error(s"unexpected key")).mkString("[",", ", "]"))
   }
 }
