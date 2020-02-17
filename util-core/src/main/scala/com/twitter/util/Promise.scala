@@ -850,29 +850,40 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
 
   @tailrec
   protected final def link(target: Promise[A]): Unit = {
-    if (this eq target) return
+    if (this eq target) {
+      return
+    }
 
     state match {
       case waitq: WaitQueue[A] =>
-        if (!cas(waitq, target)) link(target)
-        else target.continueAll(waitq)
-
+        if (!cas(waitq, target)) {
+          link(target)
+        }
+        else {
+          target.continueAll(waitq)
+        }
       case s: Interruptible[A] =>
-        if (!cas(s, target)) link(target)
+        if (!cas(s, target)) {
+          link(target)
+        }
         else {
           target.continueAll(s.waitq)
           target.setInterruptHandler(s.handler)
         }
 
       case s: Transforming[A] =>
-        if (!cas(s, target)) link(target)
+        if (!cas(s, target)) {
+          link(target)
+        }
         else {
           target.continueAll(s.waitq)
           target.forwardInterruptsTo(s.other)
         }
 
       case s: Interrupted[A] =>
-        if (!cas(s, target)) link(target)
+        if (!cas(s, target)) {
+          link(target)
+        }
         else {
           target.continueAll(s.waitq)
           target.raise(s.signal)
@@ -884,8 +895,12 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
         }
 
       case p: Promise[A] /* Linked */ =>
-        if (cas(p, target)) p.link(target)
-        else link(target)
+        if (cas(p, target)) {
+          p.link(target)
+        }
+        else {
+          link(target)
+        }
     }
   }
 
