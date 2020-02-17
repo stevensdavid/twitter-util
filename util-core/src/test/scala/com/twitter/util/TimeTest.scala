@@ -369,6 +369,14 @@ trait TimeLikeSpec[T <: TimeLike[T]] extends WordSpec with ScalaCheckDrivenPrope
       assert(fromMilliseconds(millis - 1) == Bottom)
     }
   }
+
+  // Print test coverage of Time.floor method
+  "CoverageChecker" in {
+    println("[Coverage] Floor: " + CoverageChecker.map.getOrElse(
+        "floor", sys.error(s"unexpected key")
+      ).mkString("[",", ", "]")
+    )
+  }
 }
 
 class TimeFormatTest extends WordSpec {
