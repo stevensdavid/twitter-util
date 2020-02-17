@@ -85,4 +85,10 @@ class ConfigTest extends WordSpec with Matchers {
       }
     }
   }
+    "CoverageChecker" in {
+      println("[Coverage] Collect: " + CoverageChecker.map.getOrElse(
+          "collect", sys.error(s"unexpected key")
+        ).mkString("[",", ", "]")
+      )
+    }
 }
