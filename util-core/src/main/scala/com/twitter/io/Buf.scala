@@ -5,6 +5,7 @@ import java.nio.ReadOnlyBufferException
 import java.nio.charset.{Charset, StandardCharsets => JChar}
 import scala.annotation.switch
 import scala.collection.immutable.VectorBuilder
+import com.twitter.util.CoverageChecker
 
 /**
  * Buf represents a fixed, immutable byte buffer with efficient
@@ -554,9 +555,14 @@ object Buf {
     }
 
     override def equals(other: Any): Boolean = other match {
+      val funcName = "equals"
+      CoverageChecker.initialize(funcName, 13)
       case otherBuf: Buf if length == otherBuf.length =>
+        CoverageChecker.reached(funcName, 0)
         otherBuf match {
+          CoverageChecker.reached(funcName, 1)
           case Composite(otherBufs, _) =>
+            CoverageChecker.reached(funcName, 2)
             // this is 2 nested loops, with the outer loop tracking which
             // Buf's they are on. The inner loop compares individual bytes across
             // the Bufs "segments".
@@ -565,19 +571,24 @@ object Buf {
             var byteIdx = 0
             var otherByteIdx = 0
             while (bufIdx < bufs.length && otherBufIdx < otherBufs.length) {
+              CoverageChecker.reached(funcName, 3)
               val buf = bufs(bufIdx)
               val otherB = otherBufs(otherBufIdx)
               while (byteIdx < buf.length && otherByteIdx < otherB.length) {
+                CoverageChecker.reached(funcName, 4)
                 if (buf.get(byteIdx) != otherB.get(otherByteIdx))
+                  CoverageChecker.reached(funcName, 5)
                   return false
                 byteIdx += 1
                 otherByteIdx += 1
               }
               if (byteIdx == buf.length) {
+                CoverageChecker.reached(funcName, 6)
                 byteIdx = 0
                 bufIdx += 1
               }
               if (otherByteIdx == otherB.length) {
+                CoverageChecker.reached(funcName, 7)
                 otherByteIdx = 0
                 otherBufIdx += 1
               }
@@ -585,15 +596,20 @@ object Buf {
             true
 
           case _ =>
+            CoverageChecker.reached(funcName, 8)
             otherBuf.unsafeByteArrayBuf match {
+              CoverageChecker.reached(funcName, 9)
               case Some(otherBab) =>
+                CoverageChecker.reached(funcName, 10)
                 equalsIndexed(otherBab)
               case None =>
+                CoverageChecker.reached(funcName, 11)
                 equalsIndexed(otherBuf)
             }
         }
 
       case _ =>
+        CoverageChecker.reached(funcName, 12)
         false
     }
   }
