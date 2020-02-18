@@ -19,6 +19,7 @@ package com.twitter.util
 import java.io.Serializable
 import scala.collection.mutable
 import scala.language.implicitConversions
+import com.twitter.util.CoverageChecker;
 
 /**
  * You can import Config._ if you want the auto-conversions in a class
@@ -134,43 +135,65 @@ trait Config[T] extends (() => T) {
     val buf = new mutable.ListBuffer[String]
     val mirror = scala.reflect.runtime.universe.runtimeMirror(getClass.getClassLoader)
     def collect(prefix: String, config: Config[_]): Unit = {
+      CoverageChecker.initialize("collect", 14)
       if (!alreadyVisited.contains(config)) {
+        CoverageChecker.reached("collect", 0)
         alreadyVisited += config
         val nullaryMethods = config.getClass.getMethods.toSeq filter { _.getParameterTypes.isEmpty }
         val syntheticTermNames: Set[String] = {
           val configSymbol = mirror.reflect(config).symbol
           val configMembers = configSymbol.toType.members
           configMembers.iterator.collect {
-            case symbol if symbol.isTerm && symbol.isSynthetic =>
+            case symbol if symbol.isTerm && symbol.isSynthetic => {
+              CoverageChecker.reached("collect", 1)
               symbol.name.decodedName.toString
+            }
           }.toSet
         }
         for (method <- nullaryMethods) {
+          CoverageChecker.reached("collect", 2)
           val name = method.getName
           val rt = method.getReturnType
           if (name != "required" &&
             name != "optional" &&
             !syntheticTermNames.contains(name) && // no loops, no compiler generated methods!
             interestingReturnTypes.exists(_.isAssignableFrom(rt))) {
+            CoverageChecker.reached("collect", 3)
             method.invoke(config) match {
-              case Unspecified =>
+              case Unspecified => {
+                CoverageChecker.reached("collect", 4)
                 buf += (prefix + name)
-              case specified: Specified[_] =>
+              }
+              case specified: Specified[_] => {
+                CoverageChecker.reached("collect", 5)
                 specified match {
-                  case Specified(sub: Config[_]) =>
+                  case Specified(sub: Config[_]) => {
+                    CoverageChecker.reached("collect", 6)
                     collect(prefix + name + ".", sub)
-                  case Specified(Some(sub: Config[_])) =>
+                  }
+                  case Specified(Some(sub: Config[_])) => {
+                    CoverageChecker.reached("collect", 7)
                     collect(prefix + name + ".", sub)
-                  case _ =>
+                  }
+                  case _ => CoverageChecker.reached("collect", 8)
                 }
-              case sub: Config[_] =>
+              }
+              case sub: Config[_] => {
+                CoverageChecker.reached("collect", 9)
                 collect(prefix + name + ".", sub)
-              case Some(sub: Config[_]) =>
+              }
+              case Some(sub: Config[_]) => {
+                CoverageChecker.reached("collect", 10)
                 collect(prefix + name + ".", sub)
-              case _ =>
+              }
+              case _ => CoverageChecker.reached("collect", 11)
             }
+          } else {
+            CoverageChecker.reached("collect", 12)
           }
         }
+      } else {
+        CoverageChecker.reached("collect", 13)
       }
     }
     collect("", this)
