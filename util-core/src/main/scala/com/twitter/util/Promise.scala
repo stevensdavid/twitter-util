@@ -843,36 +843,63 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
    * @return true only if the result is updated, false if it was already set.
    */
   @tailrec
-  final def updateIfEmpty(result: Try[A]): Boolean = state match {
-    case waitq: WaitQueue[A] =>
-      if (!cas(waitq, result)) updateIfEmpty(result)
-      else {
-        waitq.runInScheduler(result)
-        true
-      }
+  final def updateIfEmpty(result: Try[A]): Boolean = {
+    CoverageChecker.initialize("updateIfEmpty", 15)
+    state match {
+      case waitq: WaitQueue[A] =>
+        CoverageChecker.reached("updateIfEmpty", 0)
+        if (!cas(waitq, result)){
+          CoverageChecker.reached("updateIfEmpty", 1)
+          updateIfEmpty(result)
+        } else {
+          CoverageChecker.reached("updateIfEmpty", 2)
+          waitq.runInScheduler(result)
+          true
+        }
 
-    case s: Interruptible[A] =>
-      if (!cas(s, result)) updateIfEmpty(result)
-      else {
-        s.waitq.runInScheduler(result)
-        true
-      }
-    case s: Transforming[A] =>
-      if (!cas(s, result)) updateIfEmpty(result)
-      else {
-        s.waitq.runInScheduler(result)
-        true
-      }
-    case s: Interrupted[A] =>
-      if (!cas(s, result)) updateIfEmpty(result)
-      else {
-        s.waitq.runInScheduler(result)
-        true
-      }
+      case s: Interruptible[A] =>
+        CoverageChecker.reached("updateIfEmpty", 3)
+        if (!cas(s, result)) {
+          CoverageChecker.reached("updateIfEmpty", 4)
+          updateIfEmpty(result)
+        } else {
+          CoverageChecker.reached("updateIfEmpty", 5)
+          s.waitq.runInScheduler(result)
+          true
+        }
+      case s: Transforming[A] =>
+        CoverageChecker.reached("updateIfEmpty", 6)
+        if (!cas(s, result)) {
+          CoverageChecker.reached("updateIfEmpty", 7)
+          updateIfEmpty(result)
+        } else {
+          CoverageChecker.reached("updateIfEmpty", 8)
+          s.waitq.runInScheduler(result)
+          true
+        }
+      case s: Interrupted[A] =>
+        CoverageChecker.reached("updateIfEmpty", 9)
+        if (!cas(s, result)) {
+          CoverageChecker.reached("updateIfEmpty", 10)
+          updateIfEmpty(result)
+        } else {
+          CoverageChecker.reached("updateIfEmpty", 11)
+          s.waitq.runInScheduler(result)
+          true
+        }
 
-    case _: Try[A] /* Done */ => false
+      case _: Try[A] /* Done */ =>
+        CoverageChecker.reached("updateIfEmpty", 12)
+        false
 
-    case p: Promise[A] /* Linked */ => p.updateIfEmpty(result)
+      case p: Promise[A] /* Linked */ =>
+        CoverageChecker.reached("updateIfEmpty", 13)
+        p.updateIfEmpty(result)
+
+      case _ => 
+        CoverageChecker.reached("updateIfEmpty", 14)
+        false
+    }
   }
 
   @tailrec
