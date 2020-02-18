@@ -340,4 +340,8 @@ class PromiseTest extends FunSuite {
     assert("main thread" == Await.result(p2, 3.seconds))
     assert("main thread" == Await.result(p, 3.seconds))
   }
+
+  test("CoverageChecker") {
+    println("[Coverage - link] - " + CoverageChecker.map.getOrElse("link", sys.error(s"unexpected key")).mkString("[",", ", "]"))
+  }
 }
