@@ -1,5 +1,6 @@
 package com.twitter.util
 
+import com.twitter.util.CoverageChecker
 import java.net.{Inet4Address, InetAddress, UnknownHostException}
 
 object NetUtil {
@@ -32,34 +33,44 @@ object NetUtil {
   def ipToOptionInt(ip: String): Option[Int] = {
     // Fast IPv4 address to integer.  This is fast because it avoids split,
     // regular expressions, and String.toInt, which can throw an exception.
+    val funcName = "ipToOptionInt"
+    CoverageChecker.initialize(funcName, 8)
     val dot1 = ip.indexOf('.')
     if (dot1 <= 0) {
+      CoverageChecker.reached(funcName, 0)
       return None
     }
     val dot2 = ip.indexOf('.', dot1 + 1)
     if (dot2 == -1) {
+      CoverageChecker.reached(funcName, 1)
       return None
     }
     val dot3 = ip.indexOf('.', dot2 + 1)
     if (dot3 == -1) {
+      CoverageChecker.reached(funcName, 2)
       return None
     }
     val num1 = ipv4DecimalToInt(ip.substring(0, dot1))
     if (num1 < 0) {
+      CoverageChecker.reached(funcName, 3)
       return None
     }
     val num2 = ipv4DecimalToInt(ip.substring(dot1 + 1, dot2))
     if (num2 < 0) {
+      CoverageChecker.reached(funcName, 4)
       return None
     }
     val num3 = ipv4DecimalToInt(ip.substring(dot2 + 1, dot3))
     if (num3 < 0) {
+      CoverageChecker.reached(funcName, 5)
       return None
     }
     val num4 = ipv4DecimalToInt(ip.substring(dot3 + 1))
     if (num4 < 0) {
+      CoverageChecker.reached(funcName, 6)
       return None
     }
+    CoverageChecker.reached(funcName, 7)
     Some((num1 << 24) | (num2 << 16) | (num3 << 8) | num4)
   }
 
