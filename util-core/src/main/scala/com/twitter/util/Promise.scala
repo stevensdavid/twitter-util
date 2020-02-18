@@ -513,31 +513,35 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
     val funcName = "setInterruptHandler"
     CoverageChecker.initialize(funcName, 9)
     state match {
-      case waitq: WaitQueue[A] => {
-        CoverageChecker.reached(funcName, 0)
+      case waitq: WaitQueue[A] => {        
         if (!cas(waitq, new Interruptible(waitq, f, Local.save()))) {
-          CoverageChecker.reached(funcName, 1)
+          CoverageChecker.reached(funcName, 0)
           setInterruptHandler(f)
+        }
+        else {
+          CoverageChecker.reached(funcName, 1)
         }
       }
 
       case s: Interruptible[A] => {
-        CoverageChecker.reached(funcName, 2)
         if (!cas(s, new Interruptible(s.waitq, f, Local.save()))) {
-          CoverageChecker.reached(funcName, 3)
+          CoverageChecker.reached(funcName, 2)
           setInterruptHandler(f)
         }
+        else {
+          CoverageChecker.reached(funcName, 3)
+        }
       }
-
 
       case s: Transforming[A] => {
-        CoverageChecker.reached(funcName, 4)
         if (!cas(s, new Interruptible(s.waitq, f, Local.save()))) {
-          CoverageChecker.reached(funcName, 5)
+          CoverageChecker.reached(funcName, 4)
           setInterruptHandler(f)
         }
+        else {
+          CoverageChecker.reached(funcName, 5)
+        }
       }
-
 
       case s: Interrupted[A] => {
         CoverageChecker.reached(funcName, 6)

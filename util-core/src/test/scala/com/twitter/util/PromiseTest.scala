@@ -343,6 +343,7 @@ class PromiseTest extends FunSuite {
   }
 
   test("CoverageChecker") {
-    println("[Coverage] - " + CoverageChecker.map.getOrElse("detach", sys.error(s"unexpected key")).mkString("[",", ", "]"))
+    println("[Coverage - detach] - " + CoverageChecker.map.getOrElse("detach", sys.error(s"unexpected key")).mkString("[",", ", "]"))
+    println("[Coverage - setInterruptHandler] - " + CoverageChecker.map.getOrElse("setInterruptHandler", sys.error(s"unexpected key")).mkString("[",", ", "]"))
   }
 }
