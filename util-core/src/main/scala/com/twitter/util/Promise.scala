@@ -576,7 +576,7 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
 
   @tailrec final def raise(intr: Throwable): Unit = {
     val funcName = "raise"
-    CoverageChecker.initialize(funcName, 16)
+    CoverageChecker.initialize(funcName, 15)
     state match {
       case waitq: WaitQueue[A] =>
         if (!cas(waitq, new Interrupted(waitq, intr))) {
@@ -638,9 +638,7 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
   
       case p: Promise[A] /* Linked */ => 
         CoverageChecker.reached(funcName, 14)
-        p.raise(intr)     
-
-      case _ => CoverageChecker.reached(funcName, 15)
+        p.raise(intr)      
     }
   }
 
