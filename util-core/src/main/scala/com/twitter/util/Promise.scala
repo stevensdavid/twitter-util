@@ -607,7 +607,9 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
             try {
               s.handler.applyOrElse(intr, Promise.AlwaysUnit)
             } catch {
-              case _: Throwable => CoverageChecker.reached(funcName, 8) 
+              case e: Throwable => 
+                CoverageChecker.reached(funcName, 8) 
+                throw e
             } finally {
               Local.restore(current)
             }
