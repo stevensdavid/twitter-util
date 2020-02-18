@@ -556,7 +556,7 @@ object Buf {
 
     override def equals(other: Any): Boolean = {
       val funcName = "equals"
-      CoverageChecker.initialize(funcName, 11)
+      CoverageChecker.initialize(funcName, 13)
       other match {
         case otherBuf: Buf if length == otherBuf.length => {
           CoverageChecker.reached(funcName, 0)
@@ -581,39 +581,39 @@ object Buf {
                     return false
                   }
                   else {
-                    CoverageChecker.reached(funcName, 4)
+                    CoverageChecker.reached(funcName, 5)
                   }
                   byteIdx += 1
                   otherByteIdx += 1
                 }
                 if (byteIdx == buf.length) {
-                  CoverageChecker.reached(funcName, 5)
+                  CoverageChecker.reached(funcName, 6)
                   byteIdx = 0
                   bufIdx += 1
                 }
                 else {
-                  CoverageChecker.reached(funcName, 5)
+                  CoverageChecker.reached(funcName, 7)
                 }
                 if (otherByteIdx == otherB.length) {
-                  CoverageChecker.reached(funcName, 6)
+                  CoverageChecker.reached(funcName, 8)
                   otherByteIdx = 0
                   otherBufIdx += 1
                 }
                 else {
-                  CoverageChecker.reached(funcName, 6)
+                  CoverageChecker.reached(funcName, 9)
                 }
               }
               true
 
             case _ => {
-              CoverageChecker.reached(funcName, 7)
+              CoverageChecker.reached(funcName, 10)
               otherBuf.unsafeByteArrayBuf match {
                 case Some(otherBab) => {
-                  CoverageChecker.reached(funcName, 8)
+                  CoverageChecker.reached(funcName, 11)
                   equalsIndexed(otherBab)
                 }                  
                 case None => {
-                  CoverageChecker.reached(funcName, 9)
+                  CoverageChecker.reached(funcName, 12)
                   equalsIndexed(otherBuf)
                 }
               }
