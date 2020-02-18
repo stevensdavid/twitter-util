@@ -1,6 +1,7 @@
 package com.twitter.util
 
 import com.twitter.concurrent.Scheduler
+import com.twitter.util.CoverageChecker
 import scala.annotation.tailrec
 import scala.runtime.NonLocalReturnControl
 import scala.util.control.NonFatal
@@ -573,55 +574,57 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
     }
   }
 
-  @tailrec final def raise(intr: Throwable): Unit = state match {
-    case waitq: WaitQueue[A] =>
-      if (!cas(waitq, new Interrupted(waitq, intr))) {
-        raise(intr)
-      } else {
-
-      }
-
-    case s: Interruptible[A] =>
-      if (!cas(s, new Interrupted(s.waitq, intr))) {
-        raise(intr)
-      } else {
-        if (!UseLocalInInterruptible) {
-          s.handler.applyOrElse(intr, Promise.AlwaysUnit)
+  @tailrec final def raise(intr: Throwable): Unit = {
+    state match {
+      case waitq: WaitQueue[A] =>
+        if (!cas(waitq, new Interrupted(waitq, intr))) {
+          raise(intr)
+        } else {
+        
+        }
+  
+      case s: Interruptible[A] =>
+        if (!cas(s, new Interrupted(s.waitq, intr))) {
+          raise(intr)
+        } else {
+          if (!UseLocalInInterruptible) {
+            s.handler.applyOrElse(intr, Promise.AlwaysUnit)
+          }
+          else {
+            val current = Local.save()
+            if (current ne s.saved) {
+              Local.restore(s.saved)
+            } else {
+            
+            }
+            try {
+              s.handler.applyOrElse(intr, Promise.AlwaysUnit)
+            } catch {
+              case _: Throwable => println("HERE") 
+            } finally {
+              Local.restore(current)
+            }
+          }
+        }
+  
+      case s: Transforming[A] =>
+        if (!cas(s, new Interrupted(s.waitq, intr))) {
+          raise(intr)
         }
         else {
-          val current = Local.save()
-          if (current ne s.saved) {
-            Local.restore(s.saved)
-          } else {
-
-          }
-          try {
-            s.handler.applyOrElse(intr, Promise.AlwaysUnit)
-          } catch {
-            case _: Throwable => println("HERE") 
-          } finally {
-            Local.restore(current)
-          }
+          s.other.raise(intr)
         }
-      }
-
-    case s: Transforming[A] =>
-      if (!cas(s, new Interrupted(s.waitq, intr))) {
-        raise(intr)
-      }
-      else {
-        s.other.raise(intr)
-      }
-
-    case s: Interrupted[A] =>
-      if (!cas(s, new Interrupted(s.waitq, intr))) {
-        raise(intr)
-      }
-    case _: Try[A] /* Done */ => 
-      () // nothing to do, as its already satisfied.
-
-    case p: Promise[A] /* Linked */ => 
-      p.raise(intr)
+  
+      case s: Interrupted[A] =>
+        if (!cas(s, new Interrupted(s.waitq, intr))) {
+          raise(intr)
+        }
+      case _: Try[A] /* Done */ => 
+        () // nothing to do, as its already satisfied.
+  
+      case p: Promise[A] /* Linked */ => 
+        p.raise(intr)      
+    }
   }
 
   @tailrec protected[Promise] final def detach(k: K[A]): Boolean = {
