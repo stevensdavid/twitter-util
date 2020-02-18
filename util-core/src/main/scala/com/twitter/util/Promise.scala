@@ -810,7 +810,7 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
    */
   @tailrec
   final def updateIfEmpty(result: Try[A]): Boolean = {
-    CoverageChecker.initialize("updateIfEmpty", 15)
+    CoverageChecker.initialize("updateIfEmpty", 14)
     state match {
       case waitq: WaitQueue[A] =>
         CoverageChecker.reached("updateIfEmpty", 0)
@@ -861,16 +861,12 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
       case p: Promise[A] /* Linked */ =>
         CoverageChecker.reached("updateIfEmpty", 13)
         p.updateIfEmpty(result)
-
-      case _ => 
-        CoverageChecker.reached("updateIfEmpty", 14)
-        false
     }
   }
 
   @tailrec
   protected final def continue(k: K[A]): Unit = {
-    CoverageChecker.initialize("continue", 15)
+    CoverageChecker.initialize("continue", 14)
     state match {
       case waitq: WaitQueue[A] =>
         CoverageChecker.reached("continue", 0)
@@ -910,7 +906,6 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
       case p: Promise[A] /* Linked */ => 
         CoverageChecker.reached("continue", 13)
         p.continue(k)
-      case _ => CoverageChecker.reached("continue", 14)
     }
 
   }
