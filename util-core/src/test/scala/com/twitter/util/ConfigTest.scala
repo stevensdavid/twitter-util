@@ -45,6 +45,13 @@ class ConfigTest extends WordSpec with Matchers {
       var bar = required[Bar]
       var baz = optional[Baz]
     }
+    class Bat extends Foo {
+      def fn(): Option[Bat] = {
+        // Fill potentially missing value when method is called
+        x = 0
+        this
+      }
+    }
 
     "missingValues" should {
       "must return empty Seq when no values are missing" in {
@@ -67,6 +74,14 @@ class ConfigTest extends WordSpec with Matchers {
           bar = new Bar
         }
         assert(foo.missingValues.sorted == Seq("x", "bar.z").sorted)
+      }
+
+      "must reinvoke collect when nullary method returns Some" in {
+        val bat = new Bat {
+          bar = new Bar
+        }
+        // The change in state from bat.fn being executed should lead to "x" not being missing
+        assert(bat.missingValues.sorted == Seq("bar.z"))
       }
 
       "must find nested missing values in optional sub-configs" in {
