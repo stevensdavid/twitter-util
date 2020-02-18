@@ -580,28 +580,34 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
     state match {
       case waitq: WaitQueue[A] =>
         if (!cas(waitq, new Interrupted(waitq, intr))) {
+          CoverageChecker.reached(funcName, 0)
           raise(intr)
         } else {
-        
+          CoverageChecker.reached(funcName, 0)
         }
   
       case s: Interruptible[A] =>
         if (!cas(s, new Interrupted(s.waitq, intr))) {
+          CoverageChecker.reached(funcName, 0)
           raise(intr)
         } else {
+          CoverageChecker.reached(funcName, 0)
           if (!UseLocalInInterruptible) {
+            CoverageChecker.reached(funcName, 0)
             s.handler.applyOrElse(intr, Promise.AlwaysUnit)
           } else {
+            CoverageChecker.reached(funcName, 0)
             val current = Local.save()
             if (current ne s.saved) {
+              CoverageChecker.reached(funcName, 0)
               Local.restore(s.saved)
             } else {
-            
+              CoverageChecker.reached(funcName, 0)
             }
             try {
               s.handler.applyOrElse(intr, Promise.AlwaysUnit)
             } catch {
-              case _: Throwable => println("HERE") 
+              case _: Throwable => CoverageChecker.reached(funcName, 0) 
             } finally {
               Local.restore(current)
             }
@@ -610,21 +616,26 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
   
       case s: Transforming[A] =>
         if (!cas(s, new Interrupted(s.waitq, intr))) {
+          CoverageChecker.reached(funcName, 0)
           raise(intr)
         } else {
+          CoverageChecker.reached(funcName, 0)
           s.other.raise(intr)
         }
   
       case s: Interrupted[A] =>
         if (!cas(s, new Interrupted(s.waitq, intr))) {
+          CoverageChecker.reached(funcName, 0)
           raise(intr)
         } else {
-          
+          CoverageChecker.reached(funcName, 0)
         }
       case _: Try[A] /* Done */ => 
+        CoverageChecker.reached(funcName, 0)
         () // nothing to do, as its already satisfied.
   
       case p: Promise[A] /* Linked */ => 
+        CoverageChecker.reached(funcName, 0)
         p.raise(intr)      
     }
   }
