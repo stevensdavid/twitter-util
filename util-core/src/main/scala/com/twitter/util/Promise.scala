@@ -1,6 +1,7 @@
 package com.twitter.util
 
 import com.twitter.concurrent.Scheduler
+import com.twitter.util.CoverageChecker
 import scala.annotation.tailrec
 import scala.runtime.NonLocalReturnControl
 import scala.util.control.NonFatal
@@ -603,38 +604,72 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
     }
   }
 
-  @tailrec final def raise(intr: Throwable): Unit = state match {
-    case waitq: WaitQueue[A] =>
-      if (!cas(waitq, new Interrupted(waitq, intr)))
-        raise(intr)
-
-    case s: Interruptible[A] =>
-      if (!cas(s, new Interrupted(s.waitq, intr))) raise(intr)
-      else {
-        if (!UseLocalInInterruptible)
-          s.handler.applyOrElse(intr, Promise.AlwaysUnit)
-        else {
-          val current = Local.save()
-          if (current ne s.saved)
-            Local.restore(s.saved)
-          try s.handler.applyOrElse(intr, Promise.AlwaysUnit)
-          finally Local.restore(current)
+  @tailrec final def raise(intr: Throwable): Unit = {
+    val funcName = "raise"
+    CoverageChecker.initialize(funcName, 15)
+    state match {
+      case waitq: WaitQueue[A] =>
+        if (!cas(waitq, new Interrupted(waitq, intr))) {
+          CoverageChecker.reached(funcName, 0)
+          raise(intr)
+        } else {
+          CoverageChecker.reached(funcName, 1)
         }
-      }
-
-    case s: Transforming[A] =>
-      if (!cas(s, new Interrupted(s.waitq, intr))) raise(intr)
-      else {
-        s.other.raise(intr)
-      }
-
-    case s: Interrupted[A] =>
-      if (!cas(s, new Interrupted(s.waitq, intr)))
-        raise(intr)
-
-    case _: Try[A] /* Done */ => () // nothing to do, as its already satisfied.
-
-    case p: Promise[A] /* Linked */ => p.raise(intr)
+  
+      case s: Interruptible[A] =>
+        if (!cas(s, new Interrupted(s.waitq, intr))) {
+          CoverageChecker.reached(funcName, 2)
+          raise(intr)
+        } else {
+          CoverageChecker.reached(funcName, 3)
+          if (!UseLocalInInterruptible) {
+            CoverageChecker.reached(funcName, 4)
+            s.handler.applyOrElse(intr, Promise.AlwaysUnit)
+          } else {
+            CoverageChecker.reached(funcName, 5)
+            val current = Local.save()
+            if (current ne s.saved) {
+              CoverageChecker.reached(funcName, 6)
+              Local.restore(s.saved)
+            } else {
+              CoverageChecker.reached(funcName, 7)
+            }
+            try {
+              s.handler.applyOrElse(intr, Promise.AlwaysUnit)
+            } catch {
+              case e: Throwable => 
+                CoverageChecker.reached(funcName, 8) 
+                throw e
+            } finally {
+              Local.restore(current)
+            }
+          }
+        }
+  
+      case s: Transforming[A] =>
+        if (!cas(s, new Interrupted(s.waitq, intr))) {
+          CoverageChecker.reached(funcName, 9)
+          raise(intr)
+        } else {
+          CoverageChecker.reached(funcName, 10)
+          s.other.raise(intr)
+        }
+  
+      case s: Interrupted[A] =>
+        if (!cas(s, new Interrupted(s.waitq, intr))) {
+          CoverageChecker.reached(funcName, 11)
+          raise(intr)
+        } else {
+          CoverageChecker.reached(funcName, 12)
+        }
+      case _: Try[A] /* Done */ => 
+        CoverageChecker.reached(funcName, 13)
+        () // nothing to do, as its already satisfied.
+  
+      case p: Promise[A] /* Linked */ => 
+        CoverageChecker.reached(funcName, 14)
+        p.raise(intr)      
+    }
   }
 
   @tailrec protected[Promise] final def detach(k: K[A]): Boolean = {
@@ -838,54 +873,110 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
    * @return true only if the result is updated, false if it was already set.
    */
   @tailrec
-  final def updateIfEmpty(result: Try[A]): Boolean = state match {
-    case waitq: WaitQueue[A] =>
-      if (!cas(waitq, result)) updateIfEmpty(result)
-      else {
-        waitq.runInScheduler(result)
-        true
-      }
+  final def updateIfEmpty(result: Try[A]): Boolean = {
+    CoverageChecker.initialize("updateIfEmpty", 15)
+    state match {
+      case waitq: WaitQueue[A] =>
+        CoverageChecker.reached("updateIfEmpty", 0)
+        if (!cas(waitq, result)){
+          CoverageChecker.reached("updateIfEmpty", 1)
+          updateIfEmpty(result)
+        } else {
+          CoverageChecker.reached("updateIfEmpty", 2)
+          waitq.runInScheduler(result)
+          true
+        }
 
-    case s: Interruptible[A] =>
-      if (!cas(s, result)) updateIfEmpty(result)
-      else {
-        s.waitq.runInScheduler(result)
-        true
-      }
-    case s: Transforming[A] =>
-      if (!cas(s, result)) updateIfEmpty(result)
-      else {
-        s.waitq.runInScheduler(result)
-        true
-      }
-    case s: Interrupted[A] =>
-      if (!cas(s, result)) updateIfEmpty(result)
-      else {
-        s.waitq.runInScheduler(result)
-        true
-      }
+      case s: Interruptible[A] =>
+        CoverageChecker.reached("updateIfEmpty", 3)
+        if (!cas(s, result)) {
+          CoverageChecker.reached("updateIfEmpty", 4)
+          updateIfEmpty(result)
+        } else {
+          CoverageChecker.reached("updateIfEmpty", 5)
+          s.waitq.runInScheduler(result)
+          true
+        }
+      case s: Transforming[A] =>
+        CoverageChecker.reached("updateIfEmpty", 6)
+        if (!cas(s, result)) {
+          CoverageChecker.reached("updateIfEmpty", 7)
+          updateIfEmpty(result)
+        } else {
+          CoverageChecker.reached("updateIfEmpty", 8)
+          s.waitq.runInScheduler(result)
+          true
+        }
+      case s: Interrupted[A] =>
+        CoverageChecker.reached("updateIfEmpty", 9)
+        if (!cas(s, result)) {
+          CoverageChecker.reached("updateIfEmpty", 10)
+          updateIfEmpty(result)
+        } else {
+          CoverageChecker.reached("updateIfEmpty", 11)
+          s.waitq.runInScheduler(result)
+          true
+        }
 
-    case _: Try[A] /* Done */ => false
+      case _: Try[A] /* Done */ =>
+        CoverageChecker.reached("updateIfEmpty", 12)
+        false
 
-    case p: Promise[A] /* Linked */ => p.updateIfEmpty(result)
+      case p: Promise[A] /* Linked */ =>
+        CoverageChecker.reached("updateIfEmpty", 13)
+        p.updateIfEmpty(result)
+
+      case _ => 
+        CoverageChecker.reached("updateIfEmpty", 14)
+        false
+    }
   }
 
   @tailrec
-  protected final def continue(k: K[A]): Unit = state match {
-    case waitq: WaitQueue[A] =>
-      if (!cas(waitq, WaitQueue(k, waitq)))
-        continue(k)
-    case s: Interruptible[A] =>
-      if (!cas(s, new Interruptible(WaitQueue(k, s.waitq), s.handler, s.saved)))
-        continue(k)
-    case s: Transforming[A] =>
-      if (!cas(s, new Transforming(WaitQueue(k, s.waitq), s.other)))
-        continue(k)
-    case s: Interrupted[A] =>
-      if (!cas(s, new Interrupted(WaitQueue(k, s.waitq), s.signal)))
-        continue(k)
-    case v: Try[A] /* Done */ => k.runInScheduler(v)
-    case p: Promise[A] /* Linked */ => p.continue(k)
+  protected final def continue(k: K[A]): Unit = {
+    CoverageChecker.initialize("continue", 15)
+    state match {
+      case waitq: WaitQueue[A] =>
+        CoverageChecker.reached("continue", 0)
+        if (!cas(waitq, WaitQueue(k, waitq))) {
+          CoverageChecker.reached("continue", 1)
+          continue(k)
+        } else {
+          CoverageChecker.reached("continue", 2)
+        }
+      case s: Interruptible[A] =>
+        CoverageChecker.reached("continue", 3)
+        if (!cas(s, new Interruptible(WaitQueue(k, s.waitq), s.handler, s.saved))) {
+          CoverageChecker.reached("continue", 4)
+          continue(k)
+        } else {
+          CoverageChecker.reached("continue", 5)
+        }
+      case s: Transforming[A] =>
+        CoverageChecker.reached("continue", 6)
+        if (!cas(s, new Transforming(WaitQueue(k, s.waitq), s.other))) {
+          CoverageChecker.reached("continue", 7)
+          continue(k)
+        } else {
+          CoverageChecker.reached("continue", 8)
+        }
+      case s: Interrupted[A] =>
+        CoverageChecker.reached("continue", 9)
+        if (!cas(s, new Interrupted(WaitQueue(k, s.waitq), s.signal))) {
+          CoverageChecker.reached("continue", 10)
+          continue(k)
+        } else {
+          CoverageChecker.reached("continue", 11)
+        }
+      case v: Try[A] /* Done */ => 
+        CoverageChecker.reached("continue", 12)
+        k.runInScheduler(v)
+      case p: Promise[A] /* Linked */ => 
+        CoverageChecker.reached("continue", 13)
+        p.continue(k)
+      case _ => CoverageChecker.reached("continue", 14)
+    }
+
   }
 
   /**
@@ -905,42 +996,79 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
 
   @tailrec
   protected final def link(target: Promise[A]): Unit = {
-    if (this eq target) return
+    val funcName = "link"
+    CoverageChecker.initialize(funcName, 19)
+    if (this eq target) {
+      CoverageChecker.reached(funcName, 0)
+      return
+    }
 
     state match {
       case waitq: WaitQueue[A] =>
-        if (!cas(waitq, target)) link(target)
-        else target.continueAll(waitq)
-
-      case s: Interruptible[A] =>
-        if (!cas(s, target)) link(target)
+        CoverageChecker.reached(funcName, 1)
+        if (!cas(waitq, target)) {
+          CoverageChecker.reached(funcName, 2)
+          link(target)
+        }
         else {
+          CoverageChecker.reached(funcName, 3)
+          target.continueAll(waitq)
+        }
+      case s: Interruptible[A] =>
+        CoverageChecker.reached(funcName, 4)
+        if (!cas(s, target)) {
+          CoverageChecker.reached(funcName, 5)
+          link(target)
+        }
+        else {
+          CoverageChecker.reached(funcName, 6)
           target.continueAll(s.waitq)
           target.setInterruptHandler(s.handler)
         }
 
       case s: Transforming[A] =>
-        if (!cas(s, target)) link(target)
+        CoverageChecker.reached(funcName, 7)
+        if (!cas(s, target)) {
+          CoverageChecker.reached(funcName, 8)
+          link(target)
+        }
         else {
+          CoverageChecker.reached(funcName, 9)
           target.continueAll(s.waitq)
           target.forwardInterruptsTo(s.other)
         }
 
       case s: Interrupted[A] =>
-        if (!cas(s, target)) link(target)
+        CoverageChecker.reached(funcName, 10)
+        if (!cas(s, target)) {
+          CoverageChecker.reached(funcName, 11)
+          link(target)
+        }
         else {
+          CoverageChecker.reached(funcName, 12)
           target.continueAll(s.waitq)
           target.raise(s.signal)
         }
 
       case value: Try[A] /* Done */ =>
+        CoverageChecker.reached(funcName, 13)
         if (!target.updateIfEmpty(value) && value != Await.result(target)) {
+          CoverageChecker.reached(funcName, 14)
           throw new IllegalArgumentException("Cannot link two Done Promises with differing values")
+        } else {
+          CoverageChecker.reached(funcName, 15)
         }
 
       case p: Promise[A] /* Linked */ =>
-        if (cas(p, target)) p.link(target)
-        else link(target)
+        CoverageChecker.reached(funcName, 16)
+        if (cas(p, target)) {
+          CoverageChecker.reached(funcName, 17)
+          p.link(target)
+        }
+        else {
+          CoverageChecker.reached(funcName, 18)
+          link(target)
+        }
     }
   }
 

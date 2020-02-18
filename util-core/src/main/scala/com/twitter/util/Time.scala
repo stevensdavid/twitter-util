@@ -20,6 +20,7 @@ import java.io.Serializable
 import java.time.{Clock, Instant}
 import java.util.concurrent.TimeUnit
 import java.util.{Date, Locale, TimeZone}
+import com.twitter.util.CoverageChecker
 
 /**
  * @define now
@@ -221,14 +222,37 @@ trait TimeLike[This <: TimeLike[This]] extends Ordered[This] { self: This =>
    * Time object with duration greater than 1.hour can have unexpected
    * results because of timezones.
    */
-  def floor(increment: Duration): This = (this, increment) match {
-    case (num, ns) if num.isZero && ns.isZero => ops.Undefined
-    case (num, ns) if num.isFinite && ns.isZero =>
-      if (num.inNanoseconds < 0) ops.Bottom else ops.Top
-    case (num, denom) if num.isFinite && denom.isFinite =>
-      ops.fromNanoseconds((num.inNanoseconds / denom.inNanoseconds) * denom.inNanoseconds)
-    case (self, n) if n.isFinite => self
-    case (_, _) => ops.Undefined
+  def floor(increment: Duration): This = {
+    val funcName = "floor"
+    CoverageChecker.initialize("floor", 7)
+    (this, increment) match {
+      case (num, ns) if num.isZero && ns.isZero => {
+        CoverageChecker.reached("floor", 0)
+        ops.Undefined
+      }
+      case (num, ns) if num.isFinite && ns.isZero => {
+        CoverageChecker.reached("floor", 1)
+        if (num.inNanoseconds < 0) {
+          CoverageChecker.reached("floor", 2)
+          ops.Bottom
+        } else {
+          CoverageChecker.reached("floor", 3)
+          ops.Top
+        }
+      }
+      case (num, denom) if num.isFinite && denom.isFinite => {
+        CoverageChecker.reached("floor", 4)
+        ops.fromNanoseconds((num.inNanoseconds / denom.inNanoseconds) * denom.inNanoseconds)
+      }
+      case (self, n) if n.isFinite => {
+        CoverageChecker.reached("floor", 5)
+        self
+      }
+      case (_, _) => {
+        CoverageChecker.reached("floor", 6)
+        ops.Undefined
+      }
+    }
   }
 
   def max(that: This): This =
