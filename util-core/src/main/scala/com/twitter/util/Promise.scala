@@ -1,6 +1,7 @@
 package com.twitter.util
 
 import com.twitter.concurrent.Scheduler
+import com.twitter.util.CoverageChecker
 import scala.annotation.tailrec
 import scala.runtime.NonLocalReturnControl
 import scala.util.control.NonFatal
@@ -875,42 +876,79 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
 
   @tailrec
   protected final def link(target: Promise[A]): Unit = {
-    if (this eq target) return
+    val funcName = "link"
+    CoverageChecker.initialize(funcName, 19)
+    if (this eq target) {
+      CoverageChecker.reached(funcName, 0)
+      return
+    }
 
     state match {
       case waitq: WaitQueue[A] =>
-        if (!cas(waitq, target)) link(target)
-        else target.continueAll(waitq)
-
-      case s: Interruptible[A] =>
-        if (!cas(s, target)) link(target)
+        CoverageChecker.reached(funcName, 1)
+        if (!cas(waitq, target)) {
+          CoverageChecker.reached(funcName, 2)
+          link(target)
+        }
         else {
+          CoverageChecker.reached(funcName, 3)
+          target.continueAll(waitq)
+        }
+      case s: Interruptible[A] =>
+        CoverageChecker.reached(funcName, 4)
+        if (!cas(s, target)) {
+          CoverageChecker.reached(funcName, 5)
+          link(target)
+        }
+        else {
+          CoverageChecker.reached(funcName, 6)
           target.continueAll(s.waitq)
           target.setInterruptHandler(s.handler)
         }
 
       case s: Transforming[A] =>
-        if (!cas(s, target)) link(target)
+        CoverageChecker.reached(funcName, 7)
+        if (!cas(s, target)) {
+          CoverageChecker.reached(funcName, 8)
+          link(target)
+        }
         else {
+          CoverageChecker.reached(funcName, 9)
           target.continueAll(s.waitq)
           target.forwardInterruptsTo(s.other)
         }
 
       case s: Interrupted[A] =>
-        if (!cas(s, target)) link(target)
+        CoverageChecker.reached(funcName, 10)
+        if (!cas(s, target)) {
+          CoverageChecker.reached(funcName, 11)
+          link(target)
+        }
         else {
+          CoverageChecker.reached(funcName, 12)
           target.continueAll(s.waitq)
           target.raise(s.signal)
         }
 
       case value: Try[A] /* Done */ =>
+        CoverageChecker.reached(funcName, 13)
         if (!target.updateIfEmpty(value) && value != Await.result(target)) {
+          CoverageChecker.reached(funcName, 14)
           throw new IllegalArgumentException("Cannot link two Done Promises with differing values")
+        } else {
+          CoverageChecker.reached(funcName, 15)
         }
 
       case p: Promise[A] /* Linked */ =>
-        if (cas(p, target)) p.link(target)
-        else link(target)
+        CoverageChecker.reached(funcName, 16)
+        if (cas(p, target)) {
+          CoverageChecker.reached(funcName, 17)
+          p.link(target)
+        }
+        else {
+          CoverageChecker.reached(funcName, 18)
+          link(target)
+        }
     }
   }
 
