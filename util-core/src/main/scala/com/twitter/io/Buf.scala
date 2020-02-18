@@ -576,9 +576,13 @@ object Buf {
                 val otherB = otherBufs(otherBufIdx)
                 while (byteIdx < buf.length && otherByteIdx < otherB.length) {
                   CoverageChecker.reached(funcName, 3)
-                  if (buf.get(byteIdx) != otherB.get(otherByteIdx))
+                  if (buf.get(byteIdx) != otherB.get(otherByteIdx)){
                     CoverageChecker.reached(funcName, 4)
                     return false
+                  }
+                  else {
+                    CoverageChecker.reached(funcName, 4)
+                  }
                   byteIdx += 1
                   otherByteIdx += 1
                 }
@@ -587,10 +591,16 @@ object Buf {
                   byteIdx = 0
                   bufIdx += 1
                 }
+                else {
+                  CoverageChecker.reached(funcName, 5)
+                }
                 if (otherByteIdx == otherB.length) {
                   CoverageChecker.reached(funcName, 6)
                   otherByteIdx = 0
                   otherBufIdx += 1
+                }
+                else {
+                  CoverageChecker.reached(funcName, 6)
                 }
               }
               true
@@ -598,12 +608,14 @@ object Buf {
             case _ => {
               CoverageChecker.reached(funcName, 7)
               otherBuf.unsafeByteArrayBuf match {
-                case Some(otherBab) =>
+                case Some(otherBab) => {
                   CoverageChecker.reached(funcName, 8)
                   equalsIndexed(otherBab)
-                case None =>
+                }                  
+                case None => {
                   CoverageChecker.reached(funcName, 9)
                   equalsIndexed(otherBuf)
+                }
               }
             }
               
