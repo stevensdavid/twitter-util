@@ -45,6 +45,13 @@ class ConfigTest extends WordSpec with Matchers {
       var bar = required[Bar]
       var baz = optional[Baz]
     }
+    class Qux extends Foo {
+      def fn(): Option[Bat] = {
+        // Fill potentially missing value when method is called
+        x = 0
+        None
+      }
+    }
 
     "missingValues" should {
       "must return empty Seq when no values are missing" in {
@@ -82,6 +89,15 @@ class ConfigTest extends WordSpec with Matchers {
         // this code is deprecated and we want to stop supporting it.
         // so we simplify the test.
         assert(foo.missingValues.contains("baz.w"))
+      }
+      
+      "must not reinvoke collect in default case of invocation" in {
+        val qux = new Qux {
+          bar = new Bar
+        }
+        // x should still be missing despite the change in state from bat.fn being executed as
+        // the collect method shouldn't be re-invoked
+        assert(qux.missingValues.sorted == Seq("x", "bar.z").sorted)
       }
     }
   }
