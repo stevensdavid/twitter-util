@@ -842,21 +842,50 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
   }
 
   @tailrec
-  protected final def continue(k: K[A]): Unit = state match {
-    case waitq: WaitQueue[A] =>
-      if (!cas(waitq, WaitQueue(k, waitq)))
-        continue(k)
-    case s: Interruptible[A] =>
-      if (!cas(s, new Interruptible(WaitQueue(k, s.waitq), s.handler, s.saved)))
-        continue(k)
-    case s: Transforming[A] =>
-      if (!cas(s, new Transforming(WaitQueue(k, s.waitq), s.other)))
-        continue(k)
-    case s: Interrupted[A] =>
-      if (!cas(s, new Interrupted(WaitQueue(k, s.waitq), s.signal)))
-        continue(k)
-    case v: Try[A] /* Done */ => k.runInScheduler(v)
-    case p: Promise[A] /* Linked */ => p.continue(k)
+  protected final def continue(k: K[A]): Unit = {
+    CoverageChecker.initialize("continue", 15)
+    state match {
+      case waitq: WaitQueue[A] =>
+        CoverageChecker.reached("continue", 0)
+        if (!cas(waitq, WaitQueue(k, waitq))) {
+          CoverageChecker.reached("continue", 1)
+          continue(k)
+        } else {
+          CoverageChecker.reached("continue", 2)
+        }
+      case s: Interruptible[A] =>
+        CoverageChecker.reached("continue", 3)
+        if (!cas(s, new Interruptible(WaitQueue(k, s.waitq), s.handler, s.saved))) {
+          CoverageChecker.reached("continue", 4)
+          continue(k)
+        } else {
+          CoverageChecker.reached("continue", 5)
+        }
+      case s: Transforming[A] =>
+        CoverageChecker.reached("continue", 6)
+        if (!cas(s, new Transforming(WaitQueue(k, s.waitq), s.other))) {
+          CoverageChecker.reached("continue", 7)
+          continue(k)
+        } else {
+          CoverageChecker.reached("continue", 8)
+        }
+      case s: Interrupted[A] =>
+        CoverageChecker.reached("continue", 9)
+        if (!cas(s, new Interrupted(WaitQueue(k, s.waitq), s.signal))) {
+          CoverageChecker.reached("continue", 10)
+          continue(k)
+        } else {
+          CoverageChecker.reached("continue", 11)
+        }
+      case v: Try[A] /* Done */ => 
+        CoverageChecker.reached("continue", 12)
+        k.runInScheduler(v)
+      case p: Promise[A] /* Linked */ => 
+        CoverageChecker.reached("continue", 13)
+        p.continue(k)
+      case _ => CoverageChecker.reached("continue", 14)
+    }
+
   }
 
   /**
