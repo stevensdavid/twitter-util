@@ -296,7 +296,7 @@ class DurationTest extends { val ops: Duration.type = Duration } with TimeLikeSp
 
   "CoverageChecker" should {
     "print map" in {
-      println("[Coverage - parse] - " + CoverageChecker.map.getOrElse("parse", sys.error(s"unexpected key")).mkString("[",", ", "]"))
+      println(CoverageChecker.map.getOrElse("parse", sys.error(s"unexpected key")).mkString("[",", ", "]"))
     }
   }
 }
