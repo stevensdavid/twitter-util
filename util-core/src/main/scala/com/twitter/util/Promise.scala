@@ -6,6 +6,8 @@ import scala.annotation.tailrec
 import scala.runtime.NonLocalReturnControl
 import scala.util.control.NonFatal
 
+import com.twitter.util.CoverageChecker
+
 object Promise {
 
   // An experimental property that enables the interrupt handler
@@ -606,34 +608,57 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
     case p: Promise[A] /* Linked */ => p.raise(intr)
   }
 
-  @tailrec protected[Promise] final def detach(k: K[A]): Boolean = state match {
-    case waitq: WaitQueue[A] =>
-      if (!cas(waitq, waitq.remove(k)))
-        detach(k)
-      else
-        waitq.contains(k)
+  @tailrec protected[Promise] final def detach(k: K[A]): Boolean = {
+    CoverageChecker.initialize("detach", 10)
+    state match {
+      case waitq: WaitQueue[A] =>
+        if (!cas(waitq, waitq.remove(k))) {
+          CoverageChecker.reached("detach", 0)
+          detach(k)
+        }
+        else {
+          CoverageChecker.reached("detach", 1)
+          waitq.contains(k)
+        }
 
-    case s: Interruptible[A] =>
-      if (!cas(s, new Interruptible(s.waitq.remove(k), s.handler, s.saved)))
-        detach(k)
-      else
-        s.waitq.contains(k)
+      case s: Interruptible[A] =>
+        if (!cas(s, new Interruptible(s.waitq.remove(k), s.handler, s.saved))) {
+          CoverageChecker.reached("detach", 2)
+          detach(k)
+        }
+        else {
+          CoverageChecker.reached("detach", 3)
+          s.waitq.contains(k)
+        }
 
-    case s: Transforming[A] =>
-      if (!cas(s, new Transforming(s.waitq.remove(k), s.other)))
-        detach(k)
-      else
-        s.waitq.contains(k)
+      case s: Transforming[A] =>
+        if (!cas(s, new Transforming(s.waitq.remove(k), s.other))) {
+          CoverageChecker.reached("detach", 4)
+          detach(k)
+        }
+        else {
+          CoverageChecker.reached("detach", 5)
+          s.waitq.contains(k)
+        }
 
-    case s: Interrupted[A] =>
-      if (!cas(s, new Interrupted(s.waitq.remove(k), s.signal)))
-        detach(k)
-      else
-        s.waitq.contains(k)
+      case s: Interrupted[A] =>
+        if (!cas(s, new Interrupted(s.waitq.remove(k), s.signal))) {
+          CoverageChecker.reached("detach", 6)
+          detach(k)
+        }
+        else {
+          CoverageChecker.reached("detach", 7)
+          s.waitq.contains(k)
+        }
 
-    case _: Try[A] /* Done */ => false
+      case _: Try[A] /* Done */ =>
+        CoverageChecker.reached("detach", 8) 
+        false
 
-    case p: Promise[A] /* Linked */ => p.detach(k)
+      case p: Promise[A] /* Linked */ =>
+        CoverageChecker.reached("detach", 9) 
+        p.detach(k)
+    }
   }
 
   // Awaitable
