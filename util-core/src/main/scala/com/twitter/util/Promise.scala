@@ -815,20 +815,40 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
     case p: Promise[A] /* Linked */ => p.updateIfEmpty(result)
   }
 
-  @tailrec
-  protected final def continue(k: K[A]): Unit = state match {
-    case waitq: WaitQueue[A] =>
+  private[this] def handleWaitQueue(k: K[A]): Unit = state match {
+    case waitq: WaitQueue[A] => 
       if (!cas(waitq, WaitQueue(k, waitq)))
-        continue(k)
+          continue(k)
+  }
+
+  private[this] def handleInterruptible(k: K[A]): Unit = state match {
     case s: Interruptible[A] =>
       if (!cas(s, new Interruptible(WaitQueue(k, s.waitq), s.handler, s.saved)))
         continue(k)
+  }
+
+  private[this] def handleTransforming(k: K[A]): Unit = state match {
     case s: Transforming[A] =>
       if (!cas(s, new Transforming(WaitQueue(k, s.waitq), s.other)))
         continue(k)
+  }
+
+  private[this] def handleInterrupted(k: K[A]): Unit = state match {
     case s: Interrupted[A] =>
       if (!cas(s, new Interrupted(WaitQueue(k, s.waitq), s.signal)))
         continue(k)
+  }
+
+  @tailrec
+  protected final def continue(k: K[A]): Unit = state match {
+    case waitq: WaitQueue[A] =>
+      handleWaitQueue(k)
+    case s: Interruptible[A] =>
+      handleInterruptible(k)
+    case s: Transforming[A] =>
+      handleTransforming(k)
+    case s: Interrupted[A] =>
+      handleInterrupted(k)
     case v: Try[A] /* Done */ => k.runInScheduler(v)
     case p: Promise[A] /* Linked */ => p.continue(k)
   }
