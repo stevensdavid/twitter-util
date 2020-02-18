@@ -842,7 +842,7 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
 
   @tailrec
   protected final def continue(k: K[A]): Unit = {
-    CoverageChecker.initialize("continue", 14)
+    CoverageChecker.initialize("continue", 15)
     state match {
       case waitq: WaitQueue[A] =>
         CoverageChecker.reached("continue", 0)
@@ -882,6 +882,7 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
       case p: Promise[A] /* Linked */ => 
         CoverageChecker.reached("continue", 13)
         p.continue(k)
+      case _ => CoverageChecker.reached("continue", 14)
     }
 
   }
