@@ -12,6 +12,7 @@ import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
 import org.scalatestplus.scalacheck.Checkers
 import scala.collection.mutable
 import java.nio.charset.Charset
+import com.twitter.util.CoverageChecker
 
 class BufTest
     extends FunSuite
@@ -1009,5 +1010,9 @@ class BufTest
       assert(constructor == concatLeft)
       assert(constructor == concatRight)
     }
+  }
+
+  test("CoverageChecker") {
+    println("[Coverage - equals] - " + CoverageChecker.map.getOrElse("equals", sys.error(s"unexpected key")).mkString("[",", ", "]"))
   }
 }
