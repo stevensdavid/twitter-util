@@ -372,7 +372,7 @@ trait TimeLikeSpec[T <: TimeLike[T]] extends WordSpec with ScalaCheckDrivenPrope
 
   // Print test coverage of Time.floor method
   "CoverageChecker" in {
-    println("[Coverage] Floor: " + CoverageChecker.map.getOrElse(
+    println("[Coverage - Floor] - " + CoverageChecker.map.getOrElse(
         "floor", sys.error(s"unexpected key")
       ).mkString("[",", ", "]")
     )
