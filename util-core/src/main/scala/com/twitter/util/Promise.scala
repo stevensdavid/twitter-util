@@ -584,8 +584,7 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
     case s: Interruptible[A] =>
       if (!cas(s, new Interrupted(s.waitq, intr))) {
         raise(intr)
-      }
-      else {
+      } else {
         if (!UseLocalInInterruptible) {
           s.handler.applyOrElse(intr, Promise.AlwaysUnit)
         }
@@ -593,9 +592,16 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
           val current = Local.save()
           if (current ne s.saved) {
             Local.restore(s.saved)
+          } else {
+
           }
-          try s.handler.applyOrElse(intr, Promise.AlwaysUnit)
-          finally Local.restore(current)
+          try {
+            s.handler.applyOrElse(intr, Promise.AlwaysUnit)
+          } catch {
+            case _: Throwable => println("HERE") 
+          } finally {
+            Local.restore(current)
+          }
         }
       }
 
@@ -611,9 +617,11 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
       if (!cas(s, new Interrupted(s.waitq, intr))) {
         raise(intr)
       }
-    case _: Try[A] /* Done */ => () // nothing to do, as its already satisfied.
+    case _: Try[A] /* Done */ => 
+      () // nothing to do, as its already satisfied.
 
-    case p: Promise[A] /* Linked */ => p.raise(intr)
+    case p: Promise[A] /* Linked */ => 
+      p.raise(intr)
   }
 
   @tailrec protected[Promise] final def detach(k: K[A]): Boolean = {
