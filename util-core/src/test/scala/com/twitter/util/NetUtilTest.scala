@@ -143,5 +143,9 @@ class NetUtilTest extends WordSpec {
         NetUtil.isIpInBlocks("0.0.0.256", blocks)
       }
     }
+
+    "ipToOptionInt should not accept an IP string without a second period" in {
+      assert(NetUtil.ipToOptionInt("127.0") == None)
+    }
   }
 }
