@@ -46,7 +46,7 @@ class ConfigTest extends WordSpec with Matchers {
       var baz = optional[Baz]
     }
     class Qux extends Foo {
-      def fn(): Option[Bat] = {
+      def fn(): Option[Qux] = {
         // Fill potentially missing value when method is called
         x = 0
         None
