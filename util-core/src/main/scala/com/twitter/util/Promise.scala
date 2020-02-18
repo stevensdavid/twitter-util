@@ -852,7 +852,7 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
   @tailrec
   protected final def link(target: Promise[A]): Unit = {
     val funcName = "link"
-    CoverageChecker.initialize(funcName, 18)
+    CoverageChecker.initialize(funcName, 19)
     if (this eq target) {
       CoverageChecker.reached(funcName, 0)
       return
@@ -910,16 +910,18 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
         if (!target.updateIfEmpty(value) && value != Await.result(target)) {
           CoverageChecker.reached(funcName, 14)
           throw new IllegalArgumentException("Cannot link two Done Promises with differing values")
+        } else {
+          CoverageChecker.reached(funcName, 15)
         }
 
       case p: Promise[A] /* Linked */ =>
-        CoverageChecker.reached(funcName, 15)
+        CoverageChecker.reached(funcName, 16)
         if (cas(p, target)) {
-          CoverageChecker.reached(funcName, 16)
+          CoverageChecker.reached(funcName, 17)
           p.link(target)
         }
         else {
-          CoverageChecker.reached(funcName, 17)
+          CoverageChecker.reached(funcName, 18)
           link(target)
         }
     }
