@@ -575,6 +575,8 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
   }
 
   @tailrec final def raise(intr: Throwable): Unit = {
+    val funcName = "raise"
+    CoverageChecker.initialize(funcName, 10)
     state match {
       case waitq: WaitQueue[A] =>
         if (!cas(waitq, new Interrupted(waitq, intr))) {
@@ -589,8 +591,7 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
         } else {
           if (!UseLocalInInterruptible) {
             s.handler.applyOrElse(intr, Promise.AlwaysUnit)
-          }
-          else {
+          } else {
             val current = Local.save()
             if (current ne s.saved) {
               Local.restore(s.saved)
@@ -610,14 +611,15 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
       case s: Transforming[A] =>
         if (!cas(s, new Interrupted(s.waitq, intr))) {
           raise(intr)
-        }
-        else {
+        } else {
           s.other.raise(intr)
         }
   
       case s: Interrupted[A] =>
         if (!cas(s, new Interrupted(s.waitq, intr))) {
           raise(intr)
+        } else {
+          
         }
       case _: Try[A] /* Done */ => 
         () // nothing to do, as its already satisfied.
