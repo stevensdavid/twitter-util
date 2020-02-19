@@ -57,4 +57,8 @@ class StorageUnitTest extends FunSuite {
     val j = 4.megabytes
     assert(i.hashCode == j.hashCode)
   }
+
+  test("CoverageChecker") {
+    println("[Coverage - factor] - " + CoverageChecker.map.getOrElse("factor", sys.error(s"unexpected key")).mkString("[",", ", "]"))
+  }
 }

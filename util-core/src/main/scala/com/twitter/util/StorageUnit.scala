@@ -16,6 +16,7 @@
 
 package com.twitter.util
 
+import com.twitter.util.CoverageChecker
 import java.util.Locale
 
 object StorageUnit {
@@ -35,19 +36,40 @@ object StorageUnit {
   val zero: StorageUnit = new StorageUnit(0)
 
   private def factor(s: String): Long = {
+    CoverageChecker.initialize("factor", 10)
     var lower = s.toLowerCase
-    if (lower endsWith "s")
+    if (lower endsWith "s") {
+      CoverageChecker.reached("factor", 0)
       lower = lower dropRight 1
-
+    } else {
+      CoverageChecker.reached("factor", 1)
+    }
+      
     lower match {
-      case "byte" => 1L
-      case "kilobyte" => 1L << 10
-      case "megabyte" => 1L << 20
-      case "gigabyte" => 1L << 30
-      case "terabyte" => 1L << 40
-      case "petabyte" => 1L << 50
-      case "exabyte" => 1L << 60
-      case badUnit => throw new NumberFormatException("Unrecognized unit %s".format(badUnit))
+      case "byte" => 
+        CoverageChecker.reached("factor", 2)
+        1L
+      case "kilobyte" =>
+        CoverageChecker.reached("factor", 3) 
+        1L << 10
+      case "megabyte" => 
+        CoverageChecker.reached("factor", 4)
+        1L << 20
+      case "gigabyte" => 
+        CoverageChecker.reached("factor", 5)
+        1L << 30
+      case "terabyte" => 
+        CoverageChecker.reached("factor", 6)
+        1L << 40
+      case "petabyte" => 
+        CoverageChecker.reached("factor", 7)
+        1L << 50
+      case "exabyte" => 
+        CoverageChecker.reached("factor", 8)
+        1L << 60
+      case badUnit => 
+        CoverageChecker.reached("factor", 9)
+        throw new NumberFormatException("Unrecognized unit %s".format(badUnit))
     }
   }
 

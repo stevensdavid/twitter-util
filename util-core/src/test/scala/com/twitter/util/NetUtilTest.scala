@@ -151,5 +151,13 @@ class NetUtilTest extends WordSpec {
     "ipToOptionInt should not accept an IP string without a third period" in {
       assert(NetUtil.ipToOptionInt("127.0.0") == None)
     }
+    
+    // Print test coverage of Time.floor method
+    "CoverageChecker" in {
+      println("[Coverage - ipToOptionInt] - " + CoverageChecker.map.getOrElse(
+        "ipToOptionInt", sys.error(s"unexpected key")
+        ).mkString("[",", ", "]")
+      )
+    }
   }
 }

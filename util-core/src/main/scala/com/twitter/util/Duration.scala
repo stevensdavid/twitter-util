@@ -223,38 +223,58 @@ object Duration extends TimeLikeOps[Duration] {
    * @throws RuntimeException if the string cannot be parsed.
    */
   def parse(s: String): Duration = {
+    CoverageChecker.initialize("parse", 11)
     val ss = s.toLowerCase
     ss match {
       case FullDurationRegex(_*) =>
+        CoverageChecker.reached("parse", 0)
         SingleDurationRegex.findAllIn(ss).matchData.zipWithIndex map {
           case (m, i) =>
+            CoverageChecker.reached("parse", 1)
             val List(signStr, numStr, unitStr, special) = m.subgroups
             val absDuration = special match {
-              case "top" => Top
-              case "bottom" => Bottom
-              case "undefined" => Undefined
+              case "top" => 
+                CoverageChecker.reached("parse", 2)
+                Top
+              case "bottom" => 
+                CoverageChecker.reached("parse", 3)
+                Bottom
+              case "undefined" => 
+                CoverageChecker.reached("parse", 4)
+                Undefined
               case _ =>
                 val u = nameToUnit.get(unitStr) match {
-                  case Some(t) => t
-                  case None => throw new NumberFormatException("Invalid unit: " + unitStr)
+                  case Some(t) => 
+                    CoverageChecker.reached("parse", 5)
+                    t
+                  case None =>
+                    CoverageChecker.reached("parse", 6)
+                    throw new NumberFormatException("Invalid unit: " + unitStr)
                 }
                 Duration(numStr.toLong, u)
             }
 
             signStr match {
-              case "-" => -absDuration
+              case "-" => 
+                CoverageChecker.reached("parse", 7)
+                -absDuration
 
               // It's only OK to omit the sign for the first duration.
               case "" if i > 0 =>
+                CoverageChecker.reached("parse", 8)
                 throw new NumberFormatException("Expected a sign between durations")
 
-              case _ => absDuration
+              case _ =>
+                CoverageChecker.reached("parse", 9) 
+                absDuration
             }
 
           // It's OK to use reduce because the regex ensures that there is
           // at least one element
         } reduce { _ + _ }
-      case _ => throw new NumberFormatException("Invalid duration: " + s)
+      case _ =>
+        CoverageChecker.reached("parse", 10)
+        throw new NumberFormatException("Invalid duration: " + s)
     }
   }
 }
