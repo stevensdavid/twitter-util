@@ -3,6 +3,7 @@ package com.twitter.io
 import com.twitter.io.ByteWriter.OverflowException
 import java.nio.{ByteBuffer, CharBuffer}
 import java.nio.charset.{Charset, CoderResult, CodingErrorAction}
+import com.twitter.util.CoverageChecker
 
 /**
  * Abstract implementation of the `BufByteWriter` that is specialized to write to an
@@ -273,8 +274,10 @@ private final class DynamicBufByteWriter(arr: Array[Byte]) extends AbstractBufBy
   // the buffer size to overflow, but the contents will still fit in `MaxBufferSize`,
   // the size is scaled back to `requiredSize`.
   private[this] def resizeIfNeeded(requiredRemainingBytes: Int): Unit = {
+    val funcName = "resizeIfNeeded"
+    CoverageChecker.initialize(funcName, 6)
     if (requiredRemainingBytes > underlying.remaining) {
-
+      CoverageChecker.reached(funcName, 0)
       var size: Int = underlying.array.length
 
       val written = size - underlying.remaining
@@ -282,27 +285,38 @@ private final class DynamicBufByteWriter(arr: Array[Byte]) extends AbstractBufBy
       val requiredSize: Int = written + requiredRemainingBytes
 
       // Check to make sure we won't exceed max buffer size
-      if (requiredSize < 0 || requiredSize > MaxBufferSize)
+      if (requiredSize < 0 || requiredSize > MaxBufferSize) {
+        CoverageChecker.reached(funcName, 1)
         throw new OverflowException(
           s"maximum dynamic buffer size is $MaxBufferSize." +
             s" Insufficient space to write $requiredRemainingBytes bytes"
         )
+      }
+
 
       // Increase size of the buffer by 50% until it can contain `requiredBytes`
       while (requiredSize > size && size > 0) {
+        CoverageChecker.reached(funcName, 2)
         size = (size * 3) / 2 + 1
       }
 
       // If we've overflowed by increasing the size, scale back to `requiredSize`.
       // We know that we can still fit the current + new bytes, because of
       // the requiredSize check above.
-      if (size < 0 || requiredSize > MaxBufferSize)
+      if (size < 0 || requiredSize > MaxBufferSize) {
+        CoverageChecker.reached(funcName, 3)
         size = requiredSize
+      } else {
+        CoverageChecker.reached(funcName, 4)
+      }
+
 
       // Create a new underlying buffer
       val newArr = new Array[Byte](size)
       System.arraycopy(underlying.array, 0, newArr, 0, written)
       underlying = new FixedBufByteWriter(newArr, written)
+    } else {
+      CoverageChecker.reached(funcName, 5)
     }
   }
 
