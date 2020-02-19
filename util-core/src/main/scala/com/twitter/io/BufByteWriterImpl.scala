@@ -275,7 +275,7 @@ private final class DynamicBufByteWriter(arr: Array[Byte]) extends AbstractBufBy
   // the size is scaled back to `requiredSize`.
   private[this] def resizeIfNeeded(requiredRemainingBytes: Int): Unit = {
     val funcName = "resizeIfNeeded"
-    CoverageChecker.initialize(funcName, 5)
+    CoverageChecker.initialize(funcName, 6)
     if (requiredRemainingBytes > underlying.remaining) {
       CoverageChecker.reached(funcName, 0)
       var size: Int = underlying.array.length
@@ -306,6 +306,8 @@ private final class DynamicBufByteWriter(arr: Array[Byte]) extends AbstractBufBy
       if (size < 0 || requiredSize > MaxBufferSize) {
         CoverageChecker.reached(funcName, 3)
         size = requiredSize
+      } else {
+        CoverageChecker.reached(funcName, 4)
       }
 
 
@@ -314,7 +316,7 @@ private final class DynamicBufByteWriter(arr: Array[Byte]) extends AbstractBufBy
       System.arraycopy(underlying.array, 0, newArr, 0, written)
       underlying = new FixedBufByteWriter(newArr, written)
     } else {
-      CoverageChecker.reached(funcName, 4)
+      CoverageChecker.reached(funcName, 5)
     }
   }
 
