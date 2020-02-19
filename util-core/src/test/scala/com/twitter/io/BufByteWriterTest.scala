@@ -4,6 +4,7 @@ import java.lang.{Double => JDouble, Float => JFloat}
 import java.nio.charset.StandardCharsets
 import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import java.lang.reflect.InvocationTargetException
 
 final class BufByteWriterTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
   import ByteWriter.OverflowException
@@ -296,6 +297,23 @@ final class BufByteWriterTest extends FunSuite with ScalaCheckDrivenPropertyChec
       .owned()
     assert(buf == bytes.concat(bytes).concat(bytes))
   })
+
+  test("resizeIfNeeded throws OverflowException if requiredSize > MaxBufferSize") {
+    val bw = BufByteWriter.dynamic()
+    val ru = scala.reflect.runtime.universe
+    val rm = ru.runtimeMirror(getClass.getClassLoader)
+    val im = rm.reflect(bw)
+    val method = ru.typeOf[DynamicBufByteWriter].decl(ru.TermName("resizeIfNeeded")).asMethod
+    val resizeIfNeeded = im.reflectMethod(method)
+    try {
+      resizeIfNeeded(Int.MaxValue)
+      fail("OverflowException not thrown with max int")
+    } catch {
+      case e: InvocationTargetException =>
+        val cause = e.getCause()
+        assert(cause.isInstanceOf[OverflowException])
+    }
+  }
 
   // Requires additional heap space to run.
   // Pass JVM option '-Xmx8g'.
