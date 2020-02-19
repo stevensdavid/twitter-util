@@ -4,6 +4,7 @@ import java.lang.{Double => JDouble, Float => JFloat}
 import java.nio.charset.StandardCharsets
 import org.scalatest.FunSuite
 import org.scalatestplus.scalacheck.ScalaCheckDrivenPropertyChecks
+import com.twitter.util.CoverageChecker
 
 final class BufByteWriterTest extends FunSuite with ScalaCheckDrivenPropertyChecks {
   import ByteWriter.OverflowException
@@ -296,6 +297,10 @@ final class BufByteWriterTest extends FunSuite with ScalaCheckDrivenPropertyChec
       .owned()
     assert(buf == bytes.concat(bytes).concat(bytes))
   })
+
+   test("CoverageChecker") {
+    println("[Coverage - resizeIfNeeded] - " + CoverageChecker.map.getOrElse("resizeIfNeeded", sys.error(s"unexpected key")).mkString("[",", ", "]"))
+  }
 
   // Requires additional heap space to run.
   // Pass JVM option '-Xmx8g'.
