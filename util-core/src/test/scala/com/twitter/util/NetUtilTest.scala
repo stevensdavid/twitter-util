@@ -143,5 +143,13 @@ class NetUtilTest extends WordSpec {
         NetUtil.isIpInBlocks("0.0.0.256", blocks)
       }
     }
+
+    // Print test coverage of Time.floor method
+    "CoverageChecker" in {
+      println("[Coverage - ipToOptionInt] - " + CoverageChecker.map.getOrElse(
+        "ipToOptionInt", sys.error(s"unexpected key")
+        ).mkString("[",", ", "]")
+      )
+    }
   }
 }
