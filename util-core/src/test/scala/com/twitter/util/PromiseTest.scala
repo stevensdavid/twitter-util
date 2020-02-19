@@ -340,4 +340,42 @@ class PromiseTest extends FunSuite {
     assert("main thread" == Await.result(p2, 3.seconds))
     assert("main thread" == Await.result(p, 3.seconds))
   }
+
+  test("setInterruptHandler propagates to linked promise") {
+    Promise.useLocalInInterruptible(true)
+
+    val local = new Local[String]
+    implicit val timer: Timer = new JavaTimer(true)
+
+    local.set(Some("main thread"))
+    val p = new Promise[String]
+
+    val p2 = Promise.attached(p) // p2 is the detachable promise
+
+    // Access the private field state
+    val field = classOf[Promise[String]].getDeclaredField("state")
+    field.setAccessible(true)
+    // Set p to be the linked state of p2
+    field.set(p2, p)
+    // Set the interrupt handler for p2, which should propagate to p
+    p2.setInterruptHandler({
+      case _ =>
+        local.set(Some("Interrupt handled"))
+        val localVal = local().getOrElse("<empty>")
+        p.updateIfEmpty(Return(localVal))
+    })
+    // p2 is no longer necessary
+    p2.detach()
+
+    val thread = new Thread(new Runnable {
+      def run(): Unit = {
+        local.set(Some("worker thread"))
+
+        p.raise(new Exception)
+      }
+    })
+    thread.start()
+
+    assert("Interrupt handled" == Await.result(p, 3.seconds))
+  }
 }
