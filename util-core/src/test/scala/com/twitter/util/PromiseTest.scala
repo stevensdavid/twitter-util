@@ -246,6 +246,31 @@ class PromiseTest extends FunSuite {
     assert("main thread" == Await.result(f, 3.seconds))
   }
 
+  test("setInterruptHandler works for Interruptible promises") {
+    Promise.useLocalInInterruptible(true)
+    /* state == Interruptible */
+    val func: PartialFunction[Throwable, Unit] = { case _ => () }
+    val p: Promise[String] = new Promise[String](func)
+
+    implicit val timer: Timer = new JavaTimer(true)
+
+    p.setInterruptHandler({
+      case _ =>
+        p.updateIfEmpty(Return("Success"))
+    })
+
+    val f = Future.sleep(1.second).before(p)
+
+    val thread = new Thread(new Runnable {
+      def run(): Unit = {
+        p.raise(new Exception)        
+      }
+    })
+    thread.start()
+
+    assert("Success" == Await.result(f, 3.seconds))
+  }
+
   test("interrupts use raisers state") {
     Promise.useLocalInInterruptible(false)
 
