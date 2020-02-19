@@ -275,6 +275,26 @@ class DurationTest extends { val ops: Duration.type = Duration } with TimeLikeSp
         }
       }
     }
+
+    "throw on no sign between durations" in {
+      intercept[NumberFormatException] {
+        Seq(
+          "1.minutes 2.seconds"
+        ) foreach { s => 
+          Duration.parse(s)
+        }
+      }
+    }
+
+    "throw on invalid unit" in {
+      intercept[NumberFormatException] {
+        Seq(
+          "1.minutes + 5.secundos"
+        ) foreach { s => 
+          Duration.parse(s)
+        }
+      }
+    }
   }
 
   "Top" should {
