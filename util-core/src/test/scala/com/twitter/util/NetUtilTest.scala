@@ -147,5 +147,9 @@ class NetUtilTest extends WordSpec {
     "ipToOptionInt should not accept an IP string without a second period" in {
       assert(NetUtil.ipToOptionInt("127.0") == None)
     }
+    
+    "ipToOptionInt should not accept an IP string without a third period" in {
+      assert(NetUtil.ipToOptionInt("127.0.0") == None)
+    }
   }
 }
