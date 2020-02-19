@@ -605,30 +605,51 @@ class Promise[A] extends Future[A] with Promise.Responder[A] with Updatable[Try[
     case p: Promise[A] /* Linked */ => p.raise(intr)
   }
 
-  @tailrec protected[Promise] final def detach(k: K[A]): Boolean = state match {
+  private[this] def waitQueueHandler(k: K[A]): Boolean = state match {
     case waitq: WaitQueue[A] =>
       if (!cas(waitq, waitq.remove(k)))
         detach(k)
       else
         waitq.contains(k)
+  } 
 
+  private[this] def interruptibleHandler(k: K[A]): Boolean = state match {
     case s: Interruptible[A] =>
       if (!cas(s, new Interruptible(s.waitq.remove(k), s.handler, s.saved)))
         detach(k)
       else
-        s.waitq.contains(k)
+        s.waitq.contains(k)  
+  } 
 
+  private[this] def transformingHandler(k: K[A]): Boolean = state match {
     case s: Transforming[A] =>
       if (!cas(s, new Transforming(s.waitq.remove(k), s.other)))
         detach(k)
       else
         s.waitq.contains(k)
+  }
 
+  private[this] def interruptedHandler(k: K[A]): Boolean = state match {
     case s: Interrupted[A] =>
       if (!cas(s, new Interrupted(s.waitq.remove(k), s.signal)))
         detach(k)
       else
         s.waitq.contains(k)
+  }
+
+
+  @tailrec protected[Promise] final def detach(k: K[A]): Boolean = state match {
+    case _: WaitQueue[A] =>
+      waitQueueHandler(k)
+
+    case _: Interruptible[A] =>
+      interruptibleHandler(k)
+
+    case s: Transforming[A] =>
+      transformingHandler(k)
+
+    case s: Interrupted[A] =>
+      interruptedHandler(k)
 
     case _: Try[A] /* Done */ => false
 
