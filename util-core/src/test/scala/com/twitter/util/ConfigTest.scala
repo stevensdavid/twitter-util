@@ -45,6 +45,9 @@ class ConfigTest extends WordSpec with Matchers {
       var bar = required[Bar]
       var baz = optional[Baz]
     }
+    class Qux extends Config.Nothing {
+      var baz = required[Option[Baz]]
+    }
     class Bat extends Foo {
       def fn(): Option[Bat] = {
         // Fill potentially missing value when method is called
@@ -97,6 +100,13 @@ class ConfigTest extends WordSpec with Matchers {
         // this code is deprecated and we want to stop supporting it.
         // so we simplify the test.
         assert(foo.missingValues.contains("baz.w"))
+      }
+      
+      "must not search sub-configs that are None wrapped in Option" in {
+        val qux = new Qux {
+          baz = None
+        }
+        assert(qux.missingValues.isEmpty)
       }
     }
   }
